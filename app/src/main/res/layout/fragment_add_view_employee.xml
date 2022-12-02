@@ -94,7 +94,7 @@
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:enabled="@{viewModel.isValid()}"
+            android:enabled="@{viewModel.isValid}"
             android:padding="16dp"
             android:text="@string/save"
             app:cornerRadius="8dp"
