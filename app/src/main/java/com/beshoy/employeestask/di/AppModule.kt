@@ -5,7 +5,6 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.beshoy.employeestask.data.EmployeeDb
-import com.beshoy.employeestask.data.entity.Skill
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,6 +17,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
     private lateinit var employeeDb: EmployeeDb
+
     @Provides
     @Singleton
     fun provideEditaDatabase(app: Application): EmployeeDb {
@@ -27,12 +27,11 @@ object AppModule {
                 object : RoomDatabase.Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
-                        employeeDb.skillDao().insert(listOf(
-                            Skill(1,"PHP"),
-                            Skill(2,"ASP.NET"),
-                            Skill(3,"iOS"),
-                            Skill(4,"Android")
-                        ))
+                        db.execSQL("INSERT INTO SKILL VALUES(1,'PHP')")
+                        db.execSQL("INSERT INTO SKILL VALUES(2,'ASP.NET')")
+                        db.execSQL("INSERT INTO SKILL VALUES(3,'iOS')")
+                        db.execSQL("INSERT INTO SKILL VALUES(4,'Android')")
+
                     }
                 }
 

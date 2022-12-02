@@ -7,14 +7,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.beshoy.employeestask.R
+import com.beshoy.employeestask.data.entity.Skill
 import com.beshoy.employeestask.databinding.FragmentAddViewEmployeeBinding
+import com.freelapp.flowlifecycleobserver.collectWhileResumed
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.*
@@ -36,17 +42,17 @@ class AddViewEmployeeFragment : Fragment() {
                 ).show()
             }
         }
+
     private val cameraContract =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { gotImage ->
             if (gotImage) {
-                binding.profileImage.setImageURI(imageUri)
-                binding.profileImage.borderWidth = 2
+                viewModel.setEmployeeImageUri(imageUri.toString())
             }
         }
+
     private val galleryContract = registerForActivityResult(ActivityResultContracts.GetContent()) {
         if (it != null) {
-            binding.profileImage.setImageURI(it)
-            binding.profileImage.borderWidth = 2
+            viewModel.setEmployeeImageUri(it.toString())
         }
     }
 
@@ -64,6 +70,27 @@ class AddViewEmployeeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         imageUri = createImageUri()
+        with(viewModel) {
+            imageUri.collectWhileResumed(viewLifecycleOwner) {
+                if (it.isEmpty()) {
+                    binding.profileImage.setImageResource(R.drawable.ic_image)
+                } else {
+                    binding.profileImage.setImageURI(it.toUri())
+                    binding.profileImage.borderWidth = 2
+                }
+            }
+            uiState.collectWhileResumed(viewLifecycleOwner, ::handleUiState)
+            skills.collectWhileResumed(viewLifecycleOwner, ::fillSkillsAdapter)
+            newSkill.collectWhileResumed(viewLifecycleOwner, ::createChip)
+            isSaved.collectWhileResumed(viewLifecycleOwner) {
+                if (it)
+                    Toast.makeText(requireContext(), R.string.saved, Toast.LENGTH_SHORT).show()
+            }
+        }
+        initListeners()
+    }
+
+    private fun initListeners() {
         binding.btnCamera.setOnClickListener {
             when (PackageManager.PERMISSION_GRANTED) {
                 ContextCompat.checkSelfPermission(
@@ -78,20 +105,41 @@ class AddViewEmployeeFragment : Fragment() {
                 }
             }
         }
+
         binding.btnGallery.setOnClickListener {
-            when (PackageManager.PERMISSION_GRANTED) {
-                ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.CAMERA
-                ) -> {
-                    //launch camera
-                    galleryContract.launch("image/*")
-                }
-                else -> {
-                    requestPermissionsLauncher.launch(Manifest.permission.CAMERA)
-                }
-            }
+            galleryContract.launch("image/*")
         }
+        binding.etSkills.setOnItemClickListener { adapterView, _, position, _ ->
+            val selectedSkill = adapterView.getItemAtPosition(position) as Skill
+            viewModel.addSkill(selectedSkill)
+        }
+        binding.btnSave.setOnClickListener {
+            viewModel.saveEmployee()
+        }
+    }
+
+    private fun handleUiState(uiState: EmployeeUiState) {
+        binding.textInputLayout2.isErrorEnabled = uiState.invalidMail
+
+        if (uiState.invalidMail) {
+            binding.textInputLayout2.error = getString(R.string.invalid_mail)
+        } else {
+            binding.textInputLayout2.error = null
+        }
+
+        if (uiState.messageRes != null) {
+            Toast.makeText(requireContext(), uiState.messageRes, Toast.LENGTH_SHORT).show()
+            viewModel.messageHandled()
+        }
+    }
+
+    private fun fillSkillsAdapter(skills: List<Skill>) {
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_dropdown_item,
+            skills
+        )
+        binding.etSkills.setAdapter(adapter)
     }
 
     private fun createImageUri(): Uri {
@@ -101,6 +149,21 @@ class AddViewEmployeeFragment : Fragment() {
             "com.beshoy.employeestask.fileProvider",
             image
         )
+    }
+
+    private fun createChip(skill: Skill) {
+        val chip = Chip(requireContext()).apply {
+            text = skill.skillName
+            isCloseIconVisible = true
+            setChipBackgroundColorResource(R.color.primary_color)
+            setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+            setCloseIconTintResource(R.color.white)
+            setOnClickListener {
+                viewModel.removeSkill((it as Chip).text)
+                (it.parent as ChipGroup).removeView(it)
+            }
+        }
+        binding.cgTags.addView(chip)
     }
 
 }

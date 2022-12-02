@@ -1,5 +1,6 @@
 package com.beshoy.employeestask.data.repository
 
+import com.beshoy.employeestask.R
 import com.beshoy.employeestask.data.dao.SkillDao
 import com.beshoy.employeestask.data.entity.Skill
 import com.beshoy.employeestask.domain.repository.SkillRepository
@@ -19,7 +20,7 @@ class SkillRepositoryImpl @Inject constructor(private val dao: SkillDao) : Skill
         if (result.isNotEmpty()) {
             emit(Resource.Success(result))
         } else {
-            emit(Resource.Error("Failed to insert skills"))
+            emit(Resource.Error(R.string.failed_to_insert_skills))
         }
     }
 

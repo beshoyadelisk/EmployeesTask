@@ -9,4 +9,10 @@
     <string name="cant_open_camera_no_permission">Permission denied to open camera</string>
     <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
+    <string name="failed_to_insert_skills">Failed to insert skills</string>
+    <string name="invalid_mail">Invalid mail</string>
+    <string name="invalid_name">Invalid name</string>
+    <string name="skill_already_added">Skill already added</string>
+    <string name="select_image">Select Image</string>
+    <string name="saved">Saved</string>
 </resources>

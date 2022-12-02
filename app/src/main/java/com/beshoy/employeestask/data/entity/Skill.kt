@@ -8,4 +8,8 @@ data class Skill(
     @PrimaryKey(autoGenerate = true)
     val skillId: Int,
     val skillName: String
-)
+){
+    override fun toString(): String {
+        return skillName
+    }
+}
