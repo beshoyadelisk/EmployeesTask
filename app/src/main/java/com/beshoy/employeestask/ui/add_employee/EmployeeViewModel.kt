@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.beshoy.employeestask.domain.repository.EmployeeRepository
+import com.beshoy.employeestask.domain.repository.SkillRepository
 import com.beshoy.employeestask.util.TextUtil.isValidEmail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -14,6 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EmployeeViewModel @Inject constructor(
     private val employeeRepository: EmployeeRepository,
+    private val skillRepository: SkillRepository,
     private val dispatcher: CoroutineDispatcher,
     stateHandle: SavedStateHandle
 ) : ViewModel() {

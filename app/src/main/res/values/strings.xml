@@ -7,4 +7,6 @@
     <string name="skills">Skills</string>
     <string name="save">Save</string>
     <string name="cant_open_camera_no_permission">Permission denied to open camera</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
 </resources>

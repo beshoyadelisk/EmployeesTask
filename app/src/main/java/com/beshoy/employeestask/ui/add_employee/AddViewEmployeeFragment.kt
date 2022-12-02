@@ -27,7 +27,7 @@ class AddViewEmployeeFragment : Fragment() {
     private val requestPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
-                contract.launch(imageUri)
+                cameraContract.launch(imageUri)
             } else {
                 Toast.makeText(
                     requireContext(),
@@ -36,8 +36,18 @@ class AddViewEmployeeFragment : Fragment() {
                 ).show()
             }
         }
-    private val contract = registerForActivityResult(ActivityResultContracts.TakePicture()) {
-        binding.profileImage.setImageURI(imageUri)
+    private val cameraContract =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) { gotImage ->
+            if (gotImage) {
+                binding.profileImage.setImageURI(imageUri)
+                binding.profileImage.borderWidth = 2
+            }
+        }
+    private val galleryContract = registerForActivityResult(ActivityResultContracts.GetContent()) {
+        if (it != null) {
+            binding.profileImage.setImageURI(it)
+            binding.profileImage.borderWidth = 2
+        }
     }
 
     override fun onCreateView(
@@ -54,14 +64,28 @@ class AddViewEmployeeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         imageUri = createImageUri()
-        binding.profileImage.setOnClickListener {
+        binding.btnCamera.setOnClickListener {
             when (PackageManager.PERMISSION_GRANTED) {
                 ContextCompat.checkSelfPermission(
                     requireContext(),
                     Manifest.permission.CAMERA
                 ) -> {
                     //launch camera
-                    contract.launch(imageUri)
+                    cameraContract.launch(imageUri)
+                }
+                else -> {
+                    requestPermissionsLauncher.launch(Manifest.permission.CAMERA)
+                }
+            }
+        }
+        binding.btnGallery.setOnClickListener {
+            when (PackageManager.PERMISSION_GRANTED) {
+                ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.CAMERA
+                ) -> {
+                    //launch camera
+                    galleryContract.launch("image/*")
                 }
                 else -> {
                     requestPermissionsLauncher.launch(Manifest.permission.CAMERA)
