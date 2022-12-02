@@ -5,9 +5,9 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Employee(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
+    val employeeId: Int,
     val fullName: String,
     val email: String? = null,
-    val photo: String? = null,
-    val skills: MutableList<String> = mutableListOf()
+    val photo: String? = null
 )

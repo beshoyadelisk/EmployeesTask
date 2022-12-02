@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Skill(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
+    val skillId: Int,
     val skillName: String
 )
