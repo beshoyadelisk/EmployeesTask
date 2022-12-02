@@ -5,15 +5,18 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.beshoy.employeestask.data.converters.ListConverter
 import com.beshoy.employeestask.data.dao.EmployeeDao
+import com.beshoy.employeestask.data.dao.SkillDao
 import com.beshoy.employeestask.data.entity.Employee
+import com.beshoy.employeestask.data.entity.Skill
 
 
 @Database(
-    entities = [Employee::class],
+    entities = [Employee::class, Skill::class],
     version = 1,
     exportSchema = true
 )
 @TypeConverters(ListConverter::class)
 abstract class EmployeeDb : RoomDatabase() {
     abstract fun employeeDao(): EmployeeDao
+    abstract fun skillDao(): SkillDao
 }
