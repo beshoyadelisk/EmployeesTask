@@ -1,10 +1,8 @@
 package com.beshoy.employeestask.ui.add_employee
 
-import android.util.Patterns
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.beshoy.employeestask.data.entity.Employee
 import com.beshoy.employeestask.domain.repository.EmployeeRepository
 import com.beshoy.employeestask.util.TextUtil.isValidEmail
 import kotlinx.coroutines.CoroutineDispatcher
@@ -24,13 +22,13 @@ class EmployeeViewModel(
     val email = MutableStateFlow("")
 
     val isValid = combine(fullName, email) { name, mail ->
-       return@combine if (name.isNotEmpty()) {
+        return@combine if (name.isNotEmpty()) {
             if (mail.isNotEmpty() && mail.isValidEmail().not()) {
                 viewModelScope.launch {
                     _uiState.update { it.copy(invalidMail = true) }
                 }
                 false
-            }else {
+            } else {
                 true
             }
         } else {
