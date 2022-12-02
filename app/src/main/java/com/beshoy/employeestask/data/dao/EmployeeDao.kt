@@ -13,7 +13,11 @@ interface EmployeeDao {
 
     @Transaction
     @Insert
-    fun insertEmployeeSkillCrossRef(employeeSkillCrossRef: EmployeeSkillCrossRef):Long
+    fun insertEmployeeSkillCrossRef(employeeSkillCrossRef: EmployeeSkillCrossRef): Long
+
+    @Transaction
+    @Query("Delete from employeeskillcrossref where employeeId = :empId")
+    fun deleteEmployeeSkillCrossRef(empId: Int)
 
     @Insert
     fun insert(employee: Employee): Long

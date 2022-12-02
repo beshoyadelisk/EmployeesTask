@@ -26,8 +26,12 @@ class EmployeeRepositoryImpl @Inject constructor(private val dao: EmployeeDao) :
         emit(Resource.Success(employeesWithSkills))
     }
 
-    override suspend fun updateEmployee(employee: Employee): Flow<Resource<Int>> = flow {
-        val result = dao.update(employee)
+    override suspend fun updateEmployee(employeeWithSkills: EmployeeWithSkills): Flow<Resource<Int>> = flow {
+        val result = dao.update(employeeWithSkills.employee)
+        dao.deleteEmployeeSkillCrossRef(employeeWithSkills.employee.employeeId)
+        employeeWithSkills.skills.forEach {
+            dao.insertEmployeeSkillCrossRef(EmployeeSkillCrossRef(employeeWithSkills.employee.employeeId, it.skillId))
+        }
         emit(Resource.Success(result))
     }
 

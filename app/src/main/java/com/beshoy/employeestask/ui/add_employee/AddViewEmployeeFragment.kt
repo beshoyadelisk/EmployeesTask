@@ -18,6 +18,7 @@ import androidx.fragment.app.viewModels
 import com.beshoy.employeestask.R
 import com.beshoy.employeestask.data.entity.Skill
 import com.beshoy.employeestask.databinding.FragmentAddViewEmployeeBinding
+import com.bumptech.glide.Glide
 import com.freelapp.flowlifecycleobserver.collectWhileResumed
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -75,7 +76,11 @@ class AddViewEmployeeFragment : Fragment() {
                 if (it.isEmpty()) {
                     binding.profileImage.setImageResource(R.drawable.ic_image)
                 } else {
-                    binding.profileImage.setImageURI(it.toUri())
+                    Glide.with(requireContext())
+                        .load(it.toUri())
+                        .error(R.drawable.ic_image)
+                        .placeholder(R.drawable.ic_image)
+                        .into(binding.profileImage)
                     binding.profileImage.borderWidth = 2
                 }
             }
@@ -105,7 +110,6 @@ class AddViewEmployeeFragment : Fragment() {
                 }
             }
         }
-
         binding.btnGallery.setOnClickListener {
             galleryContract.launch("image/*")
         }

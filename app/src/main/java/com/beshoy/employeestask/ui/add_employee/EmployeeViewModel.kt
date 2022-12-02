@@ -1,6 +1,7 @@
 package com.beshoy.employeestask.ui.add_employee
 
 import androidx.annotation.StringRes
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import com.beshoy.employeestask.util.Resource
 import com.beshoy.employeestask.util.TextUtil.isValidEmail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,6 +27,7 @@ class EmployeeViewModel @Inject constructor(
     private val dispatcher: CoroutineDispatcher,
     stateHandle: SavedStateHandle
 ) : ViewModel() {
+    private val currentEmployee: EmployeeWithSkills? = stateHandle["EmpWithSkills"]
     private val _uiState = MutableStateFlow(EmployeeUiState())
     val uiState = _uiState.asStateFlow()
     private val _imageUri = MutableStateFlow("")
@@ -57,7 +60,24 @@ class EmployeeViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     init {
+        currentEmployee?.let {
+            loadDataFromEmployee(it)
+        }
         loadSkills()
+    }
+
+    private fun loadDataFromEmployee(employeeWithSkills: EmployeeWithSkills) {
+        viewModelScope.launch {
+            employeeWithSkills.skills.forEach {
+                _newSkill.emit(it)
+                delay(500)
+            }
+            _imageUri.emit(employeeWithSkills.employee.photo?.toUri().toString())
+            fullName.emit(employeeWithSkills.employee.fullName)
+            email.emit(employeeWithSkills.employee.email ?: "")
+            _addedSkills.addAll(employeeWithSkills.skills)
+
+        }
     }
 
     private fun loadSkills() {
@@ -107,11 +127,29 @@ class EmployeeViewModel @Inject constructor(
     }
 
     fun saveEmployee() {
-        val employee = Employee(fullName.value, email.value, _imageUri.value)
-        val employeeWithSkills = EmployeeWithSkills(employee, _addedSkills)
+        if (currentEmployee != null) {
+            updateEmployee(currentEmployee)
+        } else {
+            val employee = Employee(fullName.value, email.value, _imageUri.value)
+            val employeeWithSkills = EmployeeWithSkills(employee, _addedSkills)
+            viewModelScope.launch(dispatcher) {
+                employeeRepository.insertEmployeeWithSkill(employeeWithSkills).collect { resource ->
+                    when (resource) {
+                        is Resource.Error -> handleError(resource.message)
+                        is Resource.Loading -> Unit
+                        is Resource.Success -> {
+                            _isSaved.emit(true)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateEmployee(employee: EmployeeWithSkills) {
         viewModelScope.launch(dispatcher) {
-            employeeRepository.insertEmployeeWithSkill(employeeWithSkills).collect { resource ->
-                when(resource){
+            employeeRepository.updateEmployee(employee).collect { resource ->
+                when (resource) {
                     is Resource.Error -> handleError(resource.message)
                     is Resource.Loading -> Unit
                     is Resource.Success -> {

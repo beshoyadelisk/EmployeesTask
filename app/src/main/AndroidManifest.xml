@@ -12,7 +12,7 @@
     <uses-feature
         android:name="android.hardware.camera.flash"
         android:required="false" />
-
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.CAMERA" />
     <application
         android:name="com.beshoy.EmployeeApp"

@@ -3,11 +3,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/addViewEmployeeFragment">
+    app:startDestination="@id/employeesFragment">
 
     <fragment
         android:id="@+id/addViewEmployeeFragment"
         tools:layout="@layout/fragment_add_view_employee"
         android:name="com.beshoy.employeestask.ui.add_employee.AddViewEmployeeFragment"
-        android:label="AddViewEmployeeFragment" />
+        android:label="AddViewEmployeeFragment" >
+        <argument
+            android:name="EmpWithSkills"
+            app:argType="com.beshoy.employeestask.data.entity.EmployeeWithSkills"
+            app:nullable="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/employeesFragment"
+        android:name="com.beshoy.employeestask.ui.employee_list.EmployeesFragment"
+        tools:layout="@layout/layout_employee_item"
+        android:label="EmployeesFragment" >
+        <action
+            android:id="@+id/action_employeesFragment_to_addViewEmployeeFragment"
+            app:destination="@id/addViewEmployeeFragment" />
+    </fragment>
 </navigation>

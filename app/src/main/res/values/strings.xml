@@ -15,4 +15,8 @@
     <string name="skill_already_added">Skill already added</string>
     <string name="select_image">Select Image</string>
     <string name="saved">Saved</string>
+    <string name="profile_picture">profile picture</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="add_employee">Add Employee</string>
 </resources>
