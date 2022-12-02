@@ -5,14 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.beshoy.employeestask.domain.repository.EmployeeRepository
 import com.beshoy.employeestask.util.TextUtil.isValidEmail
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class EmployeeViewModel(
+@HiltViewModel
+class EmployeeViewModel @Inject constructor(
     private val employeeRepository: EmployeeRepository,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcher: CoroutineDispatcher,
     stateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(EmployeeUiState())

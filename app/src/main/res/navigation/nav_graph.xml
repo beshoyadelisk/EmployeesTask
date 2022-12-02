@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/addViewEmployeeFragment">
+
+    <fragment
+        android:id="@+id/addViewEmployeeFragment"
+        tools:layout="@layout/fragment_add_view_employee"
+        android:name="com.beshoy.employeestask.ui.add_employee.AddViewEmployeeFragment"
+        android:label="AddViewEmployeeFragment" />
+</navigation>
