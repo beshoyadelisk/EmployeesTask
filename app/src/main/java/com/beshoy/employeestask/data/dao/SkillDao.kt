@@ -12,8 +12,8 @@ interface SkillDao {
     fun getAll(): List<Skill>
 
     @Insert
-    fun insert(employee: Skill): Long
+    fun insert(skills: List<Skill>): List<Long>
 
     @Delete
-    fun delete(employee: Skill)
+    fun delete(skill: Skill)
 }
