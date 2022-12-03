@@ -13,6 +13,7 @@ class EmployeesAdapter(
     private val onDelete: (EmployeeWithSkills) -> Unit
 ) : RecyclerView.Adapter<EmployeesAdapter.ViewHolder>() {
     private var employees: List<EmployeeWithSkills> = emptyList()
+    private var filteredEmployees: List<EmployeeWithSkills> = emptyList()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(
         LayoutEmployeeItemBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -28,9 +29,19 @@ class EmployeesAdapter(
 
     fun updateList(employees: List<EmployeeWithSkills>) {
         this.employees = employees
+        this.filteredEmployees = employees
         notifyDataSetChanged()
     }
-
+    fun filterList(text:String?) {
+        if(text.isNullOrEmpty()){
+            this.employees = filteredEmployees
+        }else {
+            this.employees = filteredEmployees.filter {
+                it.employee.fullName.contains(text) || it.employee.email?.contains(text) ?: false
+            }
+        }
+        notifyDataSetChanged()
+    }
     inner class ViewHolder(
         private val binding: LayoutEmployeeItemBinding
     ) : RecyclerView.ViewHolder(binding.root) {
@@ -48,7 +59,7 @@ class EmployeesAdapter(
                 }
 
                 Glide.with(root.context)
-                    .load(employeeWithSkills.employee.photo ?: return@apply)
+                    .load(employeeWithSkills.employee.photo)
                     .placeholder(R.drawable.ic_image)
                     .error(R.drawable.ic_image)
                     .into(profileImage)

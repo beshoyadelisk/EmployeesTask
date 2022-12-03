@@ -3,17 +3,17 @@ package com.beshoy.employeestask.ui.employee_list
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.beshoy.employeestask.R
-import com.beshoy.employeestask.data.entity.Employee
 import com.beshoy.employeestask.data.entity.EmployeeWithSkills
 import com.beshoy.employeestask.databinding.FragmentEmployeesBinding
 import com.freelapp.flowlifecycleobserver.collectWhileResumed
@@ -25,7 +25,8 @@ class EmployeesFragment : Fragment() {
     private val viewModel: EmployeesListViewModel by viewModels()
     private lateinit var adapter: EmployeesAdapter
     private val requestPermissionsLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()){}
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -41,6 +42,7 @@ class EmployeesFragment : Fragment() {
         super.onResume()
         viewModel.loadEmployees()
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         adapter = EmployeesAdapter(::onEdit, ::onDelete)
@@ -49,6 +51,18 @@ class EmployeesFragment : Fragment() {
         binding.btnAddEmployee.setOnClickListener {
             findNavController().navigate(R.id.action_employeesFragment_to_addViewEmployeeFragment)
         }
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
+            androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(p0: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(text: String?): Boolean {
+                adapter.filterList(text)
+                return false
+            }
+
+        })
         with(viewModel) {
             message.collectWhileResumed(viewLifecycleOwner, ::handleMessage)
             employees.collectWhileResumed(viewLifecycleOwner, ::handleEmployees)
@@ -77,7 +91,8 @@ class EmployeesFragment : Fragment() {
     }
 
     private fun onEdit(employee: EmployeeWithSkills) {
-        val action = EmployeesFragmentDirections.actionEmployeesFragmentToAddViewEmployeeFragment(employee)
+        val action =
+            EmployeesFragmentDirections.actionEmployeesFragmentToAddViewEmployeeFragment(employee)
         findNavController().navigate(action)
     }
 
