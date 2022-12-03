@@ -2,13 +2,11 @@ package com.beshoy.employeestask.ui.employee_list
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.beshoy.employeestask.R
 import com.beshoy.employeestask.data.entity.EmployeeWithSkills
 import com.beshoy.employeestask.databinding.LayoutEmployeeItemBinding
 import com.bumptech.glide.Glide
-import java.io.File
 
 class EmployeesAdapter(
     private val onEdit: (EmployeeWithSkills) -> Unit,
@@ -50,7 +48,7 @@ class EmployeesAdapter(
                 }
 
                 Glide.with(root.context)
-                    .load(File(employeeWithSkills.employee.photo?.toUri()?.path ?: return@apply))
+                    .load(employeeWithSkills.employee.photo ?: return@apply)
                     .placeholder(R.drawable.ic_image)
                     .error(R.drawable.ic_image)
                     .into(profileImage)

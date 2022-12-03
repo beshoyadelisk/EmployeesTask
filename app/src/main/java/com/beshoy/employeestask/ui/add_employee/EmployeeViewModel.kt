@@ -1,7 +1,7 @@
 package com.beshoy.employeestask.ui.add_employee
 
+import android.graphics.Bitmap
 import androidx.annotation.StringRes
-import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,7 +15,6 @@ import com.beshoy.employeestask.util.Resource
 import com.beshoy.employeestask.util.TextUtil.isValidEmail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,8 +29,8 @@ class EmployeeViewModel @Inject constructor(
     private val currentEmployee: EmployeeWithSkills? = stateHandle["EmpWithSkills"]
     private val _uiState = MutableStateFlow(EmployeeUiState())
     val uiState = _uiState.asStateFlow()
-    private val _imageUri = MutableStateFlow("")
-    val imageUri = _imageUri.asStateFlow()
+    private val _imageUri = MutableStateFlow<Bitmap?>(null)
+    val imageUri = _imageUri.asSharedFlow()
     val fullName = MutableStateFlow("")
     val email = MutableStateFlow("")
     private val _skills = MutableStateFlow(emptyList<Skill>())
@@ -60,22 +59,19 @@ class EmployeeViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     init {
-        currentEmployee?.let {
-            loadDataFromEmployee(it)
-        }
         loadSkills()
+
     }
 
     private fun loadDataFromEmployee(employeeWithSkills: EmployeeWithSkills) {
         viewModelScope.launch {
             employeeWithSkills.skills.forEach {
                 _newSkill.emit(it)
-                delay(500)
             }
-            _imageUri.emit(employeeWithSkills.employee.photo?.toUri().toString())
             fullName.emit(employeeWithSkills.employee.fullName)
             email.emit(employeeWithSkills.employee.email ?: "")
             _addedSkills.addAll(employeeWithSkills.skills)
+            _imageUri.emit(employeeWithSkills.employee.photo ?: return@launch)
 
         }
     }
@@ -89,6 +85,9 @@ class EmployeeViewModel @Inject constructor(
                     is Resource.Success -> {
                         val list = resource.data ?: emptyList()
                         _skills.emit(list)
+                        currentEmployee?.let {
+                            loadDataFromEmployee(it)
+                        }
                     }
                 }
             }
@@ -99,9 +98,9 @@ class EmployeeViewModel @Inject constructor(
         _uiState.update { it.copy(messageRes = message) }
     }
 
-    fun setEmployeeImageUri(uri: String) {
+    fun setEmployeeImageUri(bitmap: Bitmap) {
         viewModelScope.launch {
-            _imageUri.emit(uri)
+            _imageUri.emit(bitmap)
         }
     }
 
@@ -128,6 +127,10 @@ class EmployeeViewModel @Inject constructor(
 
     fun saveEmployee() {
         if (currentEmployee != null) {
+            currentEmployee.employee.fullName = fullName.value
+            currentEmployee.employee.email = email.value
+            currentEmployee.employee.photo = _imageUri.value
+            currentEmployee.skills = _addedSkills
             updateEmployee(currentEmployee)
         } else {
             val employee = Employee(fullName.value, email.value, _imageUri.value)

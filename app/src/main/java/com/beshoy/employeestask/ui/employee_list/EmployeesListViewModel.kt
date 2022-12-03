@@ -23,11 +23,9 @@ class EmployeesListViewModel @Inject constructor(
     val message = _message.asSharedFlow()
     val isLoading = MutableStateFlow(false)
 
-    init {
-        loadEmployees()
-    }
 
-    private fun loadEmployees() {
+
+     fun loadEmployees() {
         viewModelScope.launch(dispatcher) {
             employeeRepository.getEmployeesWithSKills().collect { resource ->
                 when (resource) {

@@ -14,5 +14,5 @@ data class EmployeeWithSkills(
         entityColumn = "skillId",
         associateBy = Junction(EmployeeSkillCrossRef::class)
     )
-    val skills: List<Skill>
+    var skills: List<Skill>
 ): Parcelable

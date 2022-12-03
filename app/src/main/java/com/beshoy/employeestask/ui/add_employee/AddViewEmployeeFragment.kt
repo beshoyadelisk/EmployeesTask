@@ -2,8 +2,14 @@ package com.beshoy.employeestask.ui.add_employee
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +18,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.beshoy.employeestask.R
@@ -24,7 +29,9 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
+import java.io.FileDescriptor
 import java.util.*
+
 
 @AndroidEntryPoint
 class AddViewEmployeeFragment : Fragment() {
@@ -44,18 +51,29 @@ class AddViewEmployeeFragment : Fragment() {
             }
         }
 
+    private fun getCapturedImage(selectedPhotoUri: Uri): Bitmap {
+        val parcelFileDescriptor: ParcelFileDescriptor? = requireActivity().contentResolver.openFileDescriptor(selectedPhotoUri, "r")
+        val fileDescriptor: FileDescriptor? = parcelFileDescriptor?.fileDescriptor
+        val image = BitmapFactory.decodeFileDescriptor(fileDescriptor)
+        parcelFileDescriptor?.close()
+        return image
+    }
+
     private val cameraContract =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { gotImage ->
             if (gotImage) {
-                viewModel.setEmployeeImageUri(imageUri.toString())
+                val bitmap = getCapturedImage(imageUri)
+                viewModel.setEmployeeImageUri(bitmap)
             }
         }
 
-    private val galleryContract = registerForActivityResult(ActivityResultContracts.GetContent()) {
-        if (it != null) {
-            viewModel.setEmployeeImageUri(it.toString())
+    private val galleryContract =
+        registerForActivityResult(ActivityResultContracts.GetContent()) {
+            if (it != null) {
+                val bitmap = getCapturedImage(it)
+                viewModel.setEmployeeImageUri(bitmap)
+            }
         }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -73,11 +91,11 @@ class AddViewEmployeeFragment : Fragment() {
         imageUri = createImageUri()
         with(viewModel) {
             imageUri.collectWhileResumed(viewLifecycleOwner) {
-                if (it.isEmpty()) {
+                if (it == null) {
                     binding.profileImage.setImageResource(R.drawable.ic_image)
                 } else {
                     Glide.with(requireContext())
-                        .load(it.toUri())
+                        .load(it)
                         .error(R.drawable.ic_image)
                         .placeholder(R.drawable.ic_image)
                         .into(binding.profileImage)
